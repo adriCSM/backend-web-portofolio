@@ -69,25 +69,28 @@ module.exports = class {
     static async updatePendidikan(req, res) {
         const _id = req.id_pendidikan;
         const { sdn, smpn, sman, univ, waktuSd, waktuSmp, waktuSma, waktuKuliah } = req.body;
-
-        await pendidikan
-            .findOneAndUpdate(
-                { _id },
-                {
-                    sd: { sekolah: sdn, waktu: waktuSd },
-                    smp: { sekolah: smpn, waktu: waktuSmp },
-                    sma: { sekolah: sman, waktu: waktuSma },
-                    perguruanTinggi: {
-                        sekolah: univ,
-                        waktu: waktuKuliah,
+        if (sdn || smpn || sman || univ || waktuSd || waktuSmp || waktuSma || waktuKuliah) {
+            await pendidikan
+                .findOneAndUpdate(
+                    { _id },
+                    {
+                        sd: { sekolah: sdn, waktu: waktuSd },
+                        smp: { sekolah: smpn, waktu: waktuSmp },
+                        sma: { sekolah: sman, waktu: waktuSma },
+                        perguruanTinggi: {
+                            sekolah: univ,
+                            waktu: waktuKuliah,
+                        },
                     },
-                },
-            )
-            .then(async (data) => {
-                res.status(201).json({ message: 'berhasil update pendidikan' });
-            })
-            .catch(() => {
-                res.status(404).json({ message: 'data tidak ditemukan' });
-            });
+                )
+                .then(async (data) => {
+                    res.status(201).json({ message: 'berhasil update pendidikan' });
+                })
+                .catch((err) => {
+                    res.status(404).json({ err });
+                });
+        } else {
+            res.status(404).json({ message: 'field kosong. tidak ada data yang terupdate' });
+        }
     }
 };

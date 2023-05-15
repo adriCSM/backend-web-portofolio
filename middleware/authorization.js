@@ -5,12 +5,12 @@ const cekToken = (req, res, next) => {
         const accessToken = authHeaders.split(' ')[1];
         jwt.verify(accessToken, process.env.accessToken, (err, encoded) => {
             if (err) {
-                res.sendStatus(403);
+                res.status(403).json({ err });
             } else {
                 req.id_profil = encoded.id_profil;
                 req.id_pendidikan = encoded.id_pendidikan;
+                next();
             }
-            next();
         });
     } else {
         res.sendStatus(401);
