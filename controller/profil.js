@@ -2,6 +2,7 @@ const profil = require('../Model/profil');
 const pendidikan = require('../Model/pendidikan');
 const project = require('../Model/project');
 const moto = require('../Model/moto');
+const skillHobi = require('../Model/skillHobi');
 const moment = require('moment');
 const tanggal = moment().format('DD MMMM YYYY, h:mm:ss a');
 
@@ -11,13 +12,15 @@ module.exports = class {
         const findProfil = await profil.findOne();
         const findProject = await project.findOne();
         const findMoto = await moto.findOne();
+        const findSkillHobi = await skillHobi.findOne();
         const findPendidikan = await pendidikan.findOne();
 
         if (!findProfil && !findPendidikan && !findProject && !findMoto) {
             try {
                 const a = await project.insertMany({ createdAt: tanggal });
                 const b = await moto.insertMany({ createdAt: tanggal });
-                const c = await pendidikan.insertMany({
+                const c = await skillHobi.insertMany({ createdAt: tanggal });
+                const d = await pendidikan.insertMany({
                     createdAt: tanggal,
                     data: [
                         {
@@ -47,13 +50,15 @@ module.exports = class {
                     ],
                 });
 
-                const db = await profil.insertMany({ createdAt: tanggal, pendidikan: c[0]._id, moto: b[0]._id, projects: a[0]._id });
+                const db = await profil.insertMany({ createdAt: tanggal, pendidikan: d[0]._id, moto: b[0]._id, projects: a[0]._id, skillHobi: c[0]._id });
 
                 await profil
                     .findOne({ _id: db[0]._id })
                     .populate('pendidikan') //pilih nama atribut db profil
                     .populate('moto')
                     .populate('projects')
+                    .populate('projects')
+                    .populate('skillHobi')
                     .then((data) => {
                         res.status(200).json(data);
                     })
@@ -69,6 +74,7 @@ module.exports = class {
                 .populate('pendidikan') //pilih nama atribut db profil
                 .populate('moto')
                 .populate('projects')
+                .populate('skillHobi')
                 .then((data) => {
                     res.status(200).json(data);
                 })
@@ -222,5 +228,77 @@ module.exports = class {
             .catch((err) => {
                 res.status(400).json({ message: err });
             });
+    }
+
+    /**------------------------------Delete Skill*/
+    static async deleteSkill(req, res) {
+        const { skillName } = req.body;
+        const data = await skillHobi.findOne();
+
+        const cekInputan = data.skill.includes(skillName);
+        if (cekInputan) {
+            await skillHobi
+                .findByIdAndUpdate(
+                    { _id: data._id },
+                    {
+                        $pull: { skill: skillName },
+                    },
+                )
+                .then(() => {
+                    res.status(200).json({ message: 'Skill berhasil dihapus' });
+                })
+                .catch((err) => {
+                    res.status(400).json({ message: err });
+                });
+        } else {
+            res.status(400).json({ message: 'Inputan tidak sesuai dengan data skill. Perhatikan huruf kapital maupun spasi' });
+        }
+    }
+
+    /**------------------------------edit Skill*/
+    static async editSkill(req, res) {
+        const { skillName, edit } = req.body;
+        const data = await skillHobi.findOne();
+
+        const cekSkill = data.skill.includes(skillName);
+
+        if (cekSkill) {
+            await skillHobi
+                .findByIdAndUpdate(
+                    { _id: data._id,  },
+                    {
+                        $set: { 'skill.$[element]': edit },
+                    },{
+                        arrayFilters:[{'element':skillName}]
+                    }
+                )
+                .then((data) => {
+                    res.status(200).json({ message: 'Skill berhasil diperbarui' });
+                })
+                .catch((err) => {
+                    res.status(400).json({ message: err });
+                });
+        } else {
+            res.status(400).json({ message: 'Inputan tidak sesuai dengan data skill. Perhatikan huruf kapital maupun spasi' });
+        }
+    }
+    /**------------------------------Tambah Skill*/
+    static async addSkill(req, res) {
+        const { skillName } = req.body;
+        const data = await skillHobi.findOne();
+            await skillHobi
+                .findByIdAndUpdate(
+                    { _id: data._id,  },
+                    {
+                        $push: { 'skill': skillName },
+                    },
+                )
+                .then((data) => {
+                    res.status(200).json({ message: 'Berhasi menambahkan skill' });
+                })
+                .catch((err) => {
+                    res.status(400).json({ message: err });
+                });
+      
     }
 };

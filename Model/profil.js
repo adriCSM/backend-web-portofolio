@@ -13,7 +13,8 @@ const user = mongoose.model(
         },
         biografi: {
             type: 'string',
-            default: 'silakan tambahkan cerita singkat',
+            default:
+                'Web ini merupaka portfolio saya yang berisikan biodata serta project-project yang telah saya buat. Jika ingin membuat sebuah website silakan hubungi saya melalui sosial media atau dengan mengisi form Contact Me pada halaman paling bawah',
         },
         pendidikan: {
             type: mongoose.Schema.Types.ObjectId,
@@ -26,6 +27,10 @@ const user = mongoose.model(
         projects: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Projects',
+        },
+        skillHobi: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'SkillHobi',
         },
 
         createdAt: {

@@ -21,6 +21,13 @@ router.put('/profile/pendidikan', Profil.editPendidikan);
 // body { sd, sekolahSd, waktuSd, mulaiSd, smp, sekolahSmp, waktuSmp, mulaiSmp,
 //  sma, sekolahSma, waktuSma, mulaiSma, kuliah, univ, waktuKuliah, mulaiKuliah }
 
+router.delete('/profile/skill', Profil.deleteSkill);
+//body{skillName}
+router.put('/profile/skill', Profil.editSkill);
+//body{skillName, edit}
+router.post('/profile/skill', Profil.addSkill);
+//body{skillName}
+
 router.post('/profile/project', Profil.addProject);
 // body { name, image_url, url }
 
