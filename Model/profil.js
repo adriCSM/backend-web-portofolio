@@ -1,16 +1,41 @@
 const mongoose = require('mongoose');
 
 const user = mongoose.model(
-    'profil',
+    'Profil',
     new mongoose.Schema({
-        nama: { type: 'string', default: 'Adri Candra Saputra Mangidi' },
-        universitasAtauJabatan: { type: 'string', default: 'Universitas Haluoleo' },
-        biodata: { type: 'string', default: 'silakan tambahkan cerita singkat' },
+        name: {
+            type: 'string',
+            default: 'Adri Candra Saputra Mangidi',
+        },
+        jabatan: {
+            type: 'string',
+            default: 'Universitas Haluoleo',
+        },
+        biografi: {
+            type: 'string',
+            default: 'silakan tambahkan cerita singkat',
+        },
         pendidikan: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'pendidikan',
+            ref: 'Pendidikan',
         },
-        createdAt: { type: 'string', default: new Date() },
+        moto: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Moto',
+        },
+        projects: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Projects',
+        },
+
+        createdAt: {
+            type: 'string',
+            default: '',
+        },
+        updatedAt: {
+            type: 'string',
+            default: '',
+        },
     }),
 );
 module.exports = user;

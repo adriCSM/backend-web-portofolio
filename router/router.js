@@ -1,31 +1,38 @@
 const express = require('express');
 const router = express.Router();
-const handlerProfil = require('../controller/profil');
-const handlerLogin = require('../controller/login');
-const handlerProject = require('../controller/project');
-const handlerAuth = require('../controller/rfereshToken');
-const cekToken = require('../middleware/authorization');
+const Profil = require('../controller/profil');
+const admin = require('../controller/admin');
+const cekAdmin = require('../middleware/cekAdmin');
 
 router.get('/', (req, res) => {
     res.status(200).json({ data: 'API dapat digunakan' });
 });
-/**add admin & login */
-router.post('/admin', handlerLogin.addAdmin);
-router.post('/login', handlerLogin.login);
-
-/**refresh token */
-router.get('/token', handlerAuth.refreshToken);
+/** login */
+router.post('/admin/login', cekAdmin, admin.login);
 
 // api handler profil
-router.get('/profile', cekToken, handlerProfil.getProfil);
-router.put('/profile', cekToken, handlerProfil.updateProfil);
-router.get('/profile/pendidikan', cekToken, handlerProfil.getPendidikan);
-router.put('/profile/pendidikan', cekToken, handlerProfil.updatePendidikan);
+router.get('/profile', Profil.getProfile);
+// no body
 
-// api handler project
-router.get('/projects', cekToken, handlerProject.getProject);
-router.post('/project', cekToken, handlerProject.addProject);
-router.put('/project', cekToken, handlerProject.updateProject);
-router.delete('/logout', handlerLogin.logout);
+router.put('/profile', Profil.editProfile);
+// body{name, jabatan, biografi }
+
+router.put('/profile/pendidikan', Profil.editPendidikan);
+// body { sd, sekolahSd, waktuSd, mulaiSd, smp, sekolahSmp, waktuSmp, mulaiSmp,
+//  sma, sekolahSma, waktuSma, mulaiSma, kuliah, univ, waktuKuliah, mulaiKuliah }
+
+router.post('/profile/project', Profil.addProject);
+// body { name, image_url, url }
+
+router.put('/profile/project/:id', Profil.editProject);
+// body { name, image_url, url } params id
+
+router.delete('/profile/project/:id', Profil.hapusProject);
+// no body , params id
+
+router.put('/profile/moto', Profil.editMoto);
+// body { tag_line, deskripsi }
+
+router.delete('/logout');
 
 module.exports = router;

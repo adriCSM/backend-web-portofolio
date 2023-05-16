@@ -1,47 +1,23 @@
 const mongoose = require('mongoose');
 
 const pendidikan = mongoose.model(
-    'pendidikan',
+    'Pendidikan',
     new mongoose.Schema({
-        sd: {
-            sekolah: {
-                type: 'string',
-                default: 'SD Negeri 2 Lambangi',
+        data: [
+            {
+                jenjang: 'string',
+                nama_sekolah: 'string',
+                waktu: 'string',
+                tahun_mulai: 'string',
             },
-            waktu: {
-                type: 'string',
-                default: '2006 - 2012',
-            },
+        ],
+        createdAt: {
+            type: 'string',
+            default: '',
         },
-        smp: {
-            sekolah: {
-                type: 'string',
-                default: 'SMP Negeri 1 Wonggeduku',
-            },
-            waktu: {
-                type: 'string',
-                default: '2012 - 2015',
-            },
-        },
-        sma: {
-            sekolah: {
-                type: 'string',
-                default: 'SMA Negeri 1 Wonggeduku',
-            },
-            waktu: {
-                type: 'string',
-                default: '2015 - 2018',
-            },
-        },
-        perguruanTinggi: {
-            sekolah: {
-                type: 'string',
-                default: 'Universitas Haluoleo',
-            },
-            waktu: {
-                type: 'string',
-                default: '2018 - sekarang',
-            },
+        updatedAt: {
+            type: 'string',
+            default: '',
         },
     }),
 );

@@ -1,16 +1,17 @@
 const mongoose = require('mongoose');
 
 const admin = mongoose.model(
-    'admin',
+    'Admin',
     new mongoose.Schema({
         name: { type: 'string', required: true, default: 'admin' },
         password: { type: 'string', required: true, default: 'mangidi7' },
-        refreshToken: {
+        createdAt: {
             type: 'string',
+            default: '',
         },
-        timestamps: {
+        updatedAt: {
             type: 'string',
-            default: new Date(),
+            default: '',
         },
     }),
 );

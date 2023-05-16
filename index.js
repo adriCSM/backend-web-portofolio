@@ -9,7 +9,7 @@ const app = express();
 
 app.use(
     cors({
-        origin: ['http:api.adri-csm.my.id', 'http://localhost:8080'],
+        origin: ['https://adri-csm.my.id', 'http://localhost:8080'],
     }),
 );
 app.use(cookieParser());

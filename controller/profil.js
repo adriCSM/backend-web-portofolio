@@ -1,96 +1,226 @@
 const profil = require('../Model/profil');
 const pendidikan = require('../Model/pendidikan');
+const project = require('../Model/project');
+const moto = require('../Model/moto');
+const moment = require('moment');
+const tanggal = moment().format('DD MMMM YYYY, h:mm:ss a');
+
 module.exports = class {
-    /** ------------------------------------get profil*/
+    /**------------------------------find, insert, get database profile*/
+    static async getProfile(req, res) {
+        const findProfil = await profil.findOne();
+        const findProject = await project.findOne();
+        const findMoto = await moto.findOne();
+        const findPendidikan = await pendidikan.findOne();
 
-    static async getProfil(req, res) {
-        const _id = req.id_profil;
-
-        const cekProfil = await profil.findOne();
-        const cekPendidikan = await profil.findOne();
-
-        if (!cekPendidikan || !cekProfil) {
+        if (!findProfil && !findPendidikan && !findProject && !findMoto) {
             try {
-                await pendidikan.insertMany().then(async () => {
-                    try {
-                        const dataPendidikan = await pendidikan.findOne();
-                        await profil.insertMany({ pendidikan: dataPendidikan.id });
-                    } catch {
-                        res.status(400).json('error: gagal menambahkan data pendidikan');
-                    }
-                });
-            } catch {
-                res.status(400).json('error: gagal menambahkan data pendidikan');
-            }
-        }
-
-        await profil
-            .findOne({ _id })
-            .populate('pendidikan')
-            .then((data) => {
-                if (!data) {
-                    res.send(`data dengan nama ${nama} tidak ada`);
-                } else {
-                    res.send(data);
-                }
-            })
-            .catch((e) => {
-                res.send(e);
-            });
-    }
-    /**------------------------------------------update profil */
-    static async updateProfil(req, res) {
-        const _id = req.id_profil;
-        const { nama, universitasPekerjaan, biografi } = req;
-
-        await profil
-            .findOneAndUpdate({ _id }, { universitasAtauJabatan: universitasPekerjaan, nama, biodata: biografi })
-            .then(async () => {
-                const data = await profil.findOne({ _id }).populate('pendidikan');
-                res.status(200).json(data);
-            })
-            .catch(() => {
-                res.status(404).json({ message: 'tidak dapat mengupdate data. id yang anda masukkan tidak ditemukan' });
-            });
-    }
-
-    /**------------------------------------------get pendidikan */
-    static async getPendidikan(req, res) {
-        await pendidikan
-            .findOne()
-            .then((data) => {
-                res.status(200).json(data);
-            })
-            .catch(() => {
-                res.status(404).json({ message: 'data tidak ditemukan' });
-            });
-    }
-    /**------------------------------------------update pendidikan */
-    static async updatePendidikan(req, res) {
-        const _id = req.id_pendidikan;
-        const { sdn, smpn, sman, univ, waktuSd, waktuSmp, waktuSma, waktuKuliah } = req.body;
-        if (sdn || smpn || sman || univ || waktuSd || waktuSmp || waktuSma || waktuKuliah) {
-            await pendidikan
-                .findOneAndUpdate(
-                    { _id },
-                    {
-                        sd: { sekolah: sdn, waktu: waktuSd },
-                        smp: { sekolah: smpn, waktu: waktuSmp },
-                        sma: { sekolah: sman, waktu: waktuSma },
-                        perguruanTinggi: {
-                            sekolah: univ,
-                            waktu: waktuKuliah,
+                const a = await project.insertMany({ createdAt: tanggal });
+                const b = await moto.insertMany({ createdAt: tanggal });
+                const c = await pendidikan.insertMany({
+                    createdAt: tanggal,
+                    data: [
+                        {
+                            jenjang: 'Sekolah Dasar',
+                            nama_sekolah: 'SD Negeri 2 Lambangi',
+                            waktu: '2006-2012',
+                            tahun_mulai: '2006',
                         },
-                    },
-                )
-                .then(async (data) => {
-                    res.status(201).json({ message: 'berhasil update pendidikan' });
+                        {
+                            jenjang: 'Sekolah Menengah Pertama',
+                            nama_sekolah: 'SMP Negeri 1 Wonggeduku',
+                            waktu: '2012-2015',
+                            tahun_mulai: '2012',
+                        },
+                        {
+                            jenjang: 'Sekolah Menengah Atas',
+                            nama_sekolah: 'SMA Negeri 1 Wonggeduku',
+                            waktu: '2015-2018',
+                            tahun_mulai: '2015',
+                        },
+                        {
+                            jenjang: 'Perguruan Tinggi',
+                            nama_sekolah: 'Universitas Haluoleo',
+                            waktu: '2018-sekarang',
+                            tahun_mulai: '2018',
+                        },
+                    ],
+                });
+
+                const db = await profil.insertMany({ createdAt: tanggal, pendidikan: c[0]._id, moto: b[0]._id, projects: a[0]._id });
+
+                await profil
+                    .findOne({ _id: db[0]._id })
+                    .populate('pendidikan') //pilih nama atribut db profil
+                    .populate('moto')
+                    .populate('projects')
+                    .then((data) => {
+                        res.status(200).json(data);
+                    })
+                    .catch((err) => {
+                        res.json(err);
+                    });
+            } catch {
+                res.status(400).json({ message: 'Database gagal ditambahkan' });
+            }
+        } else {
+            await profil
+                .findOne()
+                .populate('pendidikan') //pilih nama atribut db profil
+                .populate('moto')
+                .populate('projects')
+                .then((data) => {
+                    res.status(200).json(data);
                 })
                 .catch((err) => {
-                    res.status(404).json({ err });
+                    res.json(err);
                 });
-        } else {
-            res.status(404).json({ message: 'field kosong. tidak ada data yang terupdate' });
         }
+    }
+
+    /**------------------------------Edit profile */
+    static async editProfile(req, res) {
+        const { name, jabatan, biografi } = req.body;
+
+        const data = await profil.findOne();
+        await profil
+            .findOneAndUpdate({ _id: data._id }, { name, jabatan, biografi, updatedAt: tanggal })
+            .then(() => {
+                res.status(201).json({ message: 'Profil berhasil diperbaharui' });
+            })
+            .catch((err) => {
+                res.status(400).json({ message: err });
+            });
+    }
+
+    /**------------------------------Edit pendidikan */
+    static async editPendidikan(req, res) {
+        const { sd, sekolahSd, waktuSd, mulaiSd, smp, sekolahSmp, waktuSmp, mulaiSmp, sma, sekolahSma, waktuSma, mulaiSma, kuliah, univ, waktuKuliah, mulaiKuliah } = req.body;
+        const data = await pendidikan.findOne();
+
+        await pendidikan
+            .findOneAndUpdate(
+                { _id: data._id },
+                {
+                    data: [
+                        {
+                            jenjang: sd,
+                            nama_sekolah: sekolahSd,
+                            waktu: waktuSd,
+                            tahun_mulai: mulaiSd,
+                        },
+                        {
+                            jenjang: smp,
+                            nama_sekolah: sekolahSmp,
+                            waktu: waktuSmp,
+                            tahun_mulai: mulaiSmp,
+                        },
+                        {
+                            jenjang: sma,
+                            nama_sekolah: sekolahSma,
+                            waktu: waktuSma,
+                            tahun_mulai: mulaiSma,
+                        },
+                        {
+                            jenjang: kuliah,
+                            nama_sekolah: univ,
+                            waktu: waktuKuliah,
+                            tahun_mulai: mulaiKuliah,
+                        },
+                    ],
+                    updatedAt: tanggal,
+                },
+            )
+            .then(() => {
+                res.status(201).json({ message: 'Pendidikan berhasil diperbaharui' });
+            })
+            .catch((err) => {
+                res.status(400).json({ message: err });
+            });
+    }
+
+    /**------------------------------Tambah project */
+    static async addProject(req, res) {
+        const { name, image_url, url } = req.body;
+        const item = await project.findOne();
+        await project
+            .findOneAndUpdate(
+                { _id: item._id },
+                {
+                    $push: { data: { name, image_url, url, createdAt: tanggal } },
+                },
+            )
+            .then(() => {
+                res.status(201).json({ message: 'Project berhasil ditambahkan' });
+            })
+            .catch((err) => {
+                res.status(400).json({ message: err });
+            });
+    }
+
+    /**------------------------------Edit project */
+    static async editProject(req, res) {
+        const _id = req.params.id;
+        const { name, image_url, url } = req.body;
+        const projek = await project.findOne();
+
+        await project
+            .findOneAndUpdate(
+                { _id: projek._id, data: { $elemMatch: { _id } } },
+                {
+                    $set: {
+                        'data.$.name': name,
+                        'data.$.image_utl': image_url,
+                        'data.$.url': url,
+                        'data.$.updatedAt': tanggal,
+                    },
+                },
+            )
+            .then(() => {
+                res.status(201).json({ message: 'Project berhasil diperbaharui' });
+            })
+            .catch((err) => {
+                res.status(400).json({ message: err });
+            });
+    }
+
+    /**------------------------------hapus project */
+    static async hapusProject(req, res) {
+        const _id = req.params.id;
+        const projek = await project.findOne();
+        await project
+            .findOneAndUpdate(
+                { _id: projek._id },
+                {
+                    $pull: { data: { _id } },
+                },
+            )
+            .then(() => {
+                res.status(201).json({ message: 'Project berhasil dihapus' });
+            })
+            .catch((err) => {
+                res.status(400).json({ message: err });
+            });
+    }
+
+    /**------------------------------Edit Moto */
+    static async editMoto(req, res) {
+        const { tag_line, deskripsi } = req.body;
+        const data = await moto.findOne();
+        await moto
+            .findByIdAndUpdate(
+                { _id: data._id },
+                {
+                    tag_line,
+                    deskripsi,
+                    updatedAt: tanggal,
+                },
+            )
+            .then(() => {
+                res.status(201).json({ message: 'Moto berhasil diperbaharui' });
+            })
+            .catch((err) => {
+                res.status(400).json({ message: err });
+            });
     }
 };

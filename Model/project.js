@@ -1,19 +1,38 @@
 const mongoose = require('mongoose');
 
 const project = mongoose.model(
-    'project',
+    'Projects',
     new mongoose.Schema({
-        nama: {
+        data: [
+            {
+                name: {
+                    type: 'string',
+                    required: true,
+                    default: 'project1',
+                },
+                image_url: {
+                    type: 'string',
+                    required: true,
+                    default: 'url project1',
+                },
+                url: {
+                    type: 'string',
+                    required: true,
+                    default: 'link url project1',
+                },
+                createdAt: {
+                    type: 'string',
+                    default: '',
+                },
+                updatedAt: {
+                    type: 'string',
+                    default: '',
+                },
+            },
+        ],
+        createdAt: {
             type: 'string',
-            required: true,
-        },
-        image_url: {
-            type: 'string',
-            required: true,
-        },
-        url: {
-            type: 'string',
-            required: true,
+            default: '',
         },
     }),
 );
