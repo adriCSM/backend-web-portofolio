@@ -25,14 +25,13 @@ const user = mongoose.model(
             ref: 'Moto',
         },
         projects: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Projects',
+            type: Array,
         },
         skillHobi: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'SkillHobi',
         },
-
+        url_img: { type: String, default: '' },
         createdAt: {
             type: 'string',
             default: '',

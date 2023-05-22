@@ -31,11 +31,8 @@ router.post('/profile/skill', Profil.addSkill);
 router.post('/profile/project', Profil.addProject);
 // body { name, image_url, url }
 
-router.put('/profile/project/:id', Profil.editProject);
-// body { name, image_url, url } params id
-
-router.delete('/profile/project/:id', Profil.hapusProject);
-// no body , params id
+router.delete('/profile/project', Profil.hapusProject);
+// body {name}
 
 router.put('/profile/moto', Profil.editMoto);
 // body { tag_line, deskripsi }

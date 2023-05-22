@@ -1,6 +1,5 @@
 const profil = require('../Model/profil');
 const pendidikan = require('../Model/pendidikan');
-const project = require('../Model/project');
 const moto = require('../Model/moto');
 const skillHobi = require('../Model/skillHobi');
 const moment = require('moment');
@@ -10,14 +9,12 @@ module.exports = class {
     /**------------------------------find, insert, get database profile*/
     static async getProfile(req, res) {
         const findProfil = await profil.findOne();
-        const findProject = await project.findOne();
         const findMoto = await moto.findOne();
         const findSkillHobi = await skillHobi.findOne();
         const findPendidikan = await pendidikan.findOne();
 
-        if (!findProfil && !findPendidikan && !findProject && !findMoto) {
+        if (!findProfil && !findPendidikan && !findMoto && !findSkillHobi) {
             try {
-                const a = await project.insertMany({ createdAt: tanggal });
                 const b = await moto.insertMany({ createdAt: tanggal });
                 const c = await skillHobi.insertMany({ createdAt: tanggal });
                 const d = await pendidikan.insertMany({
@@ -50,7 +47,7 @@ module.exports = class {
                     ],
                 });
 
-                const db = await profil.insertMany({ createdAt: tanggal, pendidikan: d[0]._id, moto: b[0]._id, projects: a[0]._id, skillHobi: c[0]._id });
+                const db = await profil.insertMany({ createdAt: tanggal, pendidikan: d[0]._id, moto: b[0]._id, skillHobi: c[0]._id });
 
                 await profil
                     .findOne({ _id: db[0]._id })
@@ -86,11 +83,11 @@ module.exports = class {
 
     /**------------------------------Edit profile */
     static async editProfile(req, res) {
-        const { name, jabatan, biografi } = req.body;
+        const { name, jabatan, biografi, url } = req.body;
 
         const data = await profil.findOne();
         await profil
-            .findOneAndUpdate({ _id: data._id }, { name, jabatan, biografi, updatedAt: tanggal })
+            .findOneAndUpdate({ _id: data._id }, { name, jabatan, biografi, updatedAt: tanggal, url_img: url })
             .then(() => {
                 res.status(201).json({ message: 'Profil berhasil diperbaharui' });
             })
@@ -148,12 +145,12 @@ module.exports = class {
     /**------------------------------Tambah project */
     static async addProject(req, res) {
         const { name, image_url, url } = req.body;
-        const item = await project.findOne();
-        await project
+        const item = await profil.findOne();
+        await profil
             .findOneAndUpdate(
                 { _id: item._id },
                 {
-                    $push: { data: { name, image_url, url, createdAt: tanggal } },
+                    $push: { projects: { name, image_url, url, createdAt: tanggal } },
                 },
             )
             .then(() => {
@@ -164,41 +161,16 @@ module.exports = class {
             });
     }
 
-    /**------------------------------Edit project */
-    static async editProject(req, res) {
-        const _id = req.params.id;
-        const { name, image_url, url } = req.body;
-        const projek = await project.findOne();
-
-        await project
-            .findOneAndUpdate(
-                { _id: projek._id, data: { $elemMatch: { _id } } },
-                {
-                    $set: {
-                        'data.$.name': name,
-                        'data.$.image_utl': image_url,
-                        'data.$.url': url,
-                        'data.$.updatedAt': tanggal,
-                    },
-                },
-            )
-            .then(() => {
-                res.status(201).json({ message: 'Project berhasil diperbaharui' });
-            })
-            .catch((err) => {
-                res.status(400).json({ message: err });
-            });
-    }
-
     /**------------------------------hapus project */
     static async hapusProject(req, res) {
-        const _id = req.params.id;
-        const projek = await project.findOne();
-        await project
+        const { name } = req.body;
+        const projek = await profil.findOne();
+
+        await profil
             .findOneAndUpdate(
                 { _id: projek._id },
                 {
-                    $pull: { data: { _id } },
+                    $pull: { projects: { name } },
                 },
             )
             .then(() => {
@@ -265,12 +237,13 @@ module.exports = class {
         if (cekSkill) {
             await skillHobi
                 .findByIdAndUpdate(
-                    { _id: data._id,  },
+                    { _id: data._id },
                     {
                         $set: { 'skill.$[element]': edit },
-                    },{
-                        arrayFilters:[{'element':skillName}]
-                    }
+                    },
+                    {
+                        arrayFilters: [{ element: skillName }],
+                    },
                 )
                 .then((data) => {
                     res.status(200).json({ message: 'Skill berhasil diperbarui' });
@@ -286,19 +259,18 @@ module.exports = class {
     static async addSkill(req, res) {
         const { skillName } = req.body;
         const data = await skillHobi.findOne();
-            await skillHobi
-                .findByIdAndUpdate(
-                    { _id: data._id,  },
-                    {
-                        $push: { 'skill': skillName },
-                    },
-                )
-                .then((data) => {
-                    res.status(200).json({ message: 'Berhasi menambahkan skill' });
-                })
-                .catch((err) => {
-                    res.status(400).json({ message: err });
-                });
-      
+        await skillHobi
+            .findByIdAndUpdate(
+                { _id: data._id },
+                {
+                    $push: { skill: skillName },
+                },
+            )
+            .then((data) => {
+                res.status(200).json({ message: 'Berhasi menambahkan skill' });
+            })
+            .catch((err) => {
+                res.status(400).json({ message: err });
+            });
     }
 };

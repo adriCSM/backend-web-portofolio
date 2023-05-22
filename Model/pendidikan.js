@@ -3,14 +3,7 @@ const mongoose = require('mongoose');
 const pendidikan = mongoose.model(
     'Pendidikan',
     new mongoose.Schema({
-        data: [
-            {
-                jenjang: 'string',
-                nama_sekolah: 'string',
-                waktu: 'string',
-                tahun_mulai: 'string',
-            },
-        ],
+        data: { type: Array },
         createdAt: {
             type: 'string',
             default: '',

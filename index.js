@@ -24,7 +24,6 @@ mongoose
     .catch(() => {
         console.log('connection mongoDB unsuccessfully');
     });
-
 app.use('/', require('./router/router'));
 
 app.listen(process.env.PORT, () => {
