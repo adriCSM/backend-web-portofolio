@@ -29,10 +29,11 @@ module.exports = class {
     }
 
     static async addKomen(req, res) {
-        const { nama, komen } = req.body;
+        const { nama, komen, imageUrl } = req.body;
         await komentar
             .insertMany({
                 nama,
+                image_url: imageUrl,
                 komentar: komen,
                 createdAt: tanggal,
             })
