@@ -48,8 +48,8 @@ module.exports = class {
     static async findKomen(req, res) {
         await komentar
             .find()
-            .then(() => {
-                res.status(200);
+            .then((data) => {
+                res.status(200).json({ data });
             })
             .catch((err) => {
                 res.status(404).json({ message: err.message });
