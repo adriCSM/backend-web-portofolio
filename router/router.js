@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Profil = require('../controller/profil');
 const admin = require('../controller/admin');
+const user = require('../controller/user');
 const cekAdmin = require('../middleware/cekAdmin');
 
 router.get('/', (req, res) => {
@@ -9,6 +10,7 @@ router.get('/', (req, res) => {
 });
 /** login */
 router.post('/admin/login', cekAdmin, admin.login);
+router.post('/user', user.add);
 
 // api handler profil
 router.get('/profile', Profil.getProfile);
