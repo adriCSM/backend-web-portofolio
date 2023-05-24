@@ -1,4 +1,5 @@
 const user = require('../Model/user');
+const komentar = require('../Model/komentar');
 const moment = require('moment');
 const tanggal = moment().format('DD MMMM YYYY, h:mm:ss a');
 module.exports = class {
@@ -25,5 +26,32 @@ module.exports = class {
         } else {
             res.status(400).json({ message: 'Akun sudah terdaftar' });
         }
+    }
+
+    static async addKomen(req, res) {
+        const { nama, komen } = req.body;
+        await komentar
+            .insertMany({
+                nama,
+                komentar: komen,
+                createdAt: tanggal,
+            })
+            .then(() => {
+                res.status(201).json({ message: 'Komentar berhasil ditambahkan' });
+            })
+            .catch((err) => {
+                res.status(400).json({ message: err.message });
+            });
+    }
+
+    static async findKomen(req, res) {
+        await komentar
+            .find()
+            .then(() => {
+                res.status(200);
+            })
+            .catch((err) => {
+                res.status(404).json({ message: err.message });
+            });
     }
 };

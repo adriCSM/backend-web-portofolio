@@ -11,6 +11,8 @@ router.get('/', (req, res) => {
 /** login */
 router.post('/admin/login', cekAdmin, admin.login);
 router.post('/user', user.add);
+router.post('/user/comment', user.addKomen);
+router.get('/user/comment', user.findKomen);
 
 // api handler profil
 router.get('/profile', Profil.getProfile);
