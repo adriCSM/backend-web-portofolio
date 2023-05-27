@@ -146,19 +146,25 @@ module.exports = class {
     static async addProject(req, res) {
         const { name, image_url, url } = req.body;
         const item = await profil.findOne();
-        await profil
-            .findOneAndUpdate(
-                { _id: item._id },
-                {
-                    $push: { projects: { name, image_url, url, createdAt: tanggal } },
-                },
-            )
-            .then(() => {
-                res.status(201).json({ message: 'Project berhasil ditambahkan' });
-            })
-            .catch((err) => {
-                res.status(400).json({ message: err });
-            });
+        const cek = await profil.findOne({ projects: { $elemMatch: { name } } });
+
+        if (!cek) {
+            await profil
+                .findOneAndUpdate(
+                    { _id: item._id },
+                    {
+                        $push: { projects: { name, image_url, url, createdAt: tanggal } },
+                    },
+                )
+                .then(() => {
+                    res.status(201).json({ message: 'Project berhasil ditambahkan' });
+                })
+                .catch((err) => {
+                    res.status(400).json({ message: err.message });
+                });
+        } else {
+            res.status(400).json({ message: 'Nama project sudah ada' });
+        }
     }
 
     /**------------------------------hapus project */
